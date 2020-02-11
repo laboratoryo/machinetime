@@ -10,8 +10,7 @@ module.exports = {
 
 	db.query(queryString)
 	  .then( data => {
-		console.log(data);
-		res.locals.reservations = data.rows[0];
+		res.locals.reservations = data.rows;
 		return next();
 	  })
 	  .catch( err => {
