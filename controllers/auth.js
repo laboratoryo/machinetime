@@ -70,8 +70,9 @@ module.exports = {
               keys.secretOrKey,
               { expiresIn: 86400 },
               (err, token) => {
-                if (err) return next(err);
-                else {
+                if (err) {
+				  return next(err);
+				} else {
                   res.locals.token = 'Bearer ' + token;
                   return next();
                 }
