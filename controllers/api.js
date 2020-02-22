@@ -41,6 +41,28 @@ module.exports = {
 		console.log('Error saving reservation to database: ', err);
 		return next({ err });
 	  });
+  },
+
+  getUserReservations: (req, res, next) => {
+	const { user } = req.user;
+
+	const queryString = `
+	  SELECT (start_time, end_time, created_at)
+	  FROM reservations
+	  WHERE user_id = $1
+	`;
+
+	db.query(queryString, [req.params.id])
+	  .then( data => {
+		res.locals.reservations = data.rows;
+		next();
+	  })
+	  .catch( err => next(err));
+
+  },
+  checkToken: (req, res, next) => {
+	console.log(req.headers, req.user);
+	next();
   }
 
 };
