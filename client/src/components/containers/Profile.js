@@ -13,7 +13,6 @@ const Profile = props => {
 
 
   useEffect( () => {
-	console.log('auth', authContext.user.userID);
 	axios.get('/api/user/'+authContext.user.userID)
 		 .then( res => {
 		   const responseData = res.data.reservations;
@@ -21,7 +20,6 @@ const Profile = props => {
 		   for (let i = 0; i < responseData.length; i++) {
 			 updatedReservations.push(responseData[i].row.slice(1,-1).split(','));
 		   };
-		   console.log('updated ', updatedReservations);
 		   setReservations(updatedReservations)
 		 })
 		 .catch( err => console.log('Err: ', err));
@@ -31,10 +29,7 @@ const Profile = props => {
     <li key={i}>{res[0]}</li>
   ));
 
-
-  return (
-    <div className='container'>
-	  <h1>User Profile</h1>
+  const updateProfile = (
 	  <form>
 		<InputLabel id='first-name-input'>First Name</InputLabel>
 		<TextField placeholder={authContext.user.firstName} className='input' fullWidth variant='outlined' name='first_name' type='text' />
@@ -44,17 +39,38 @@ const Profile = props => {
 		<TextField placeholder={authContext.user.phone} className='input' fullWidth variant='outlined' name='first_name' type='text' />
 		<Button id='update-user' className='auth-button' color='primary' variant='contained' startIcon={<Save />}>Update Profile</Button>
 	  </form>
-	  <h1>Current Reservations</h1>
-	  <ul>
-		{currentReservations}
-	  </ul>
+  );
 
-	  <h1>Past Reservations</h1>
+  const displayProfile = (
+	  <form>
+		<InputLabel id='first-name-input'>First Name</InputLabel>
+		<h2>{authContext.user.firstName}</h2>
+		<InputLabel id='last-name-input'>Last Name</InputLabel>
+		<h2>{authContext.user.lastName}</h2>
+		<InputLabel id='phone-input'>Phone Number</InputLabel>
+		<h2>{authContext.user.phone}</h2>
+		<Button id='update-user' className='auth-button' color='primary' variant='contained' startIcon={<Save />}>Update Profile</Button>
+	  </form>
+  );
+
+
+  return (
+	<div id='profile'>
+	  <div className='container'>
+		<h1>User Profile</h1>
+		{displayProfile}
+		<h1>Current Reservations</h1>
+		<ul>
+		  {currentReservations}
+		</ul>
+
+		<h1>Past Reservations</h1>
 
 
 
-      <h1>Danger Zone</h1>
-	  <Button id='delete-user' className='auth-button' color='secondary' variant='contained' startIcon={<Delete />}>Delete Account</Button>
+		<h1>Danger Zone</h1>
+		<Button id='delete-user' className='auth-button' color='secondary' variant='contained' startIcon={<Delete />}>Delete Account</Button>
+	  </div>
 	</div>
   )
 }
