@@ -12,27 +12,39 @@ const Profile = props => {
 
   const [reservations, setReservations] = useState([]);
   const [updateMode, setUpdateMode] = useState(false);
+  const [profile, setProfile] = useState(authContext.user);
 
   useEffect( () => {
+	getReservations();
+  }, []);
+
+  const getReservations = () => {
 	axios.get('/api/user/'+authContext.user.userID)
 		 .then( res => {
 		   const responseData = res.data.reservations;
-		   const updatedReservations = [...reservations];
+		   const updatedReservations = [];
 		   for (let i = 0; i < responseData.length; i++) {
 			 updatedReservations.push(responseData[i].row.slice(1,-1).split(','));
 		   };
 		   setReservations(updatedReservations)
 		 })
 		 .catch( err => console.log('Err: ', err));
-  }, []);
+  }
+
+  const handleChange = e => {
+	setProfile({
+	  ...profile,
+	  [e.target.name]: e.target.value
+	})
+  };
 
 
   const cancelReservation = resId => {
-	console.log('E: ', resId);
-	axios.delete('/api/reservation/'+resId)
-		 .then( data => console.log('Rows deleted: ', data))
-		 .catch( err => console.log('Error: ', err));
-
+	if (confirm('Are you sure you want to cancel this reservation?')) {
+	  axios.delete('/api/reservation/'+resId)
+		   .then( res => getReservations() )
+		   .catch( err => console.log('Error: ', err));
+	};
   };
 
   const active = reservations.filter( (res, i) => {
@@ -40,7 +52,7 @@ const Profile = props => {
   });
 
   const currentReservations = active.map( (res, i) => (
-    <li key={i}>
+    <li key={i} className='reservation'>
 	  {moment(res[0]).format('ddd MMM DD YYYY HH:MM')} : {res[2]} for {moment.duration(moment(res[1]).diff(moment(res[0]))).asHours().toFixed(1)} hours
 	  <IconButton className='cancel-button' size='small' data-id={res.id} onClick={() => cancelReservation(res[4])} aria-label='Cancel this reservation'> <Cancel fontSize='inherit'/> </IconButton>
 	</li>
@@ -51,21 +63,40 @@ const Profile = props => {
   });
 
   const pastReservations = done.map( (res, i) => (
-    <li key={i}>{moment(res[0]).format('ddd MMM DD YYYY HH:MM')} : {res[2]} for {moment.duration(moment(res[1]).diff(moment(res[0]))).asHours().toFixed(1)} hours</li>
+    <li key={i} className='reservation'>
+	  {moment(res[0]).format('ddd MMM DD YYYY HH:MM')} : {res[2]} for {moment.duration(moment(res[1]).diff(moment(res[0]))).asHours().toFixed(1)} hours
+	</li>
   ));
 
   const toggleMode = () => setUpdateMode(!updateMode);
 
+  const saveProfile = () => {
+	const profileUpdates = {
+	  email: profile.email,
+	  first_name: profile.firstName,
+	  last_name: profile.lastName,
+	  phone: profile.phone
+	}
+
+	console.log(profileUpdates);
+	// TODO: send axios post
+	axios.put('/auth/update/' + authContext.user.userID, profileUpdates)
+	  .then( res => console.log('Response ', res))
+	  .catch( err => console.log('Error: ', err));
+  };
+
   const updateProfile = (
 	  <form>
 		<InputLabel id='first-name-input'>First Name</InputLabel>
-		<TextField placeholder={authContext.user.firstName} className='input' fullWidth variant='outlined' name='first_name' type='text' />
+		<TextField placeholder={authContext.user.firstName} className='input' fullWidth variant='outlined' name='firstName' type='text' onChange={handleChange} value={profile.firstName} />
 		<InputLabel id='last-name-input'>Last Name</InputLabel>
-		<TextField placeholder={authContext.user.lastName} className='input' fullWidth variant='outlined' name='first_name' type='text' />
+		<TextField placeholder={authContext.user.lastName} className='input' fullWidth variant='outlined' name='lastName' type='text' onChange={handleChange} value={profile.lastName} />
+		<InputLabel id='phone-input'>Email</InputLabel>
+		<TextField placeholder={authContext.user.email} className='input' fullWidth variant='outlined' name='email' type='text' onChange={handleChange} value={profile.email} />
 		<InputLabel id='phone-input'>Phone Number</InputLabel>
-		<TextField placeholder={authContext.user.phone} className='input' fullWidth variant='outlined' name='first_name' type='text' />
-		<Button id='update-user' className='auth-button' color='primary' variant='contained' onClick={() => console.log('TODO: create save handler')} startIcon={<Save />}>Save Profile</Button>
-		<Button id='update-user' className='auth-button' color='default' variant='contained' onClick={toggleMode} startIcon={<Cancel />}>Cancel</Button>
+		<TextField placeholder={authContext.user.phone} className='input' fullWidth variant='outlined' name='phone' type='text' onChange={handleChange} value={profile.phone} />
+		<Button id='update-user' className='auth-button' color='primary' variant='contained' onClick={saveProfile} startIcon={<Save />}>Save Profile</Button>
+		<Button id='update-user' className='auth-button' color='secondary' variant='contained' onClick={toggleMode} startIcon={<Cancel />}>Cancel</Button>
 	  </form>
   );
 
@@ -75,6 +106,8 @@ const Profile = props => {
 		<h2>{authContext.user.firstName}</h2>
 		<InputLabel id='last-name-input'>Last Name</InputLabel>
 		<h2>{authContext.user.lastName}</h2>
+		<InputLabel id='email-input'>Email</InputLabel>
+		<h2>{authContext.user.email}</h2>
 		<InputLabel id='phone-input'>Phone Number</InputLabel>
 		<h2>{authContext.user.phone}</h2>
 		<Button id='update-user' className='auth-button' color='primary' variant='contained' onClick={toggleMode} startIcon={<Edit />}>Update Profile</Button>
