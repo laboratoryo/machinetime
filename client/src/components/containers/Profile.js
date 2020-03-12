@@ -112,6 +112,14 @@ const Profile = props => {
 	  </form>
   );
 
+  const deleteAccount = () => {
+	if (confirm('Are you sure you want to delete your account? THIS IS NOT REVERSIBLE!')) {
+	  axios.delete('/auth/profile/' + authContext.user.userID)
+		.then( res => console.log('Response: ', res))
+		.catch( err => console.log('Error: ', err));
+	}
+  };
+
   return (
 	<div id='profile'>
 	  <div className='container'>
@@ -129,7 +137,7 @@ const Profile = props => {
 
 
 		<h1>Danger Zone</h1>
-		<Button id='delete-user' className='auth-button' color='secondary' variant='contained' startIcon={<Delete />}>Delete Account</Button>
+		<Button id='delete-user' className='auth-button' color='secondary' variant='contained' onClick={deleteAccount} startIcon={<Delete />}>Delete Account</Button>
 	  </div>
 	</div>
   )
