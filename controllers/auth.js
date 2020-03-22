@@ -6,8 +6,19 @@ const jwt = require("jsonwebtoken");
 const keys = require("./../config/keys");
 const passport = require("passport");
 
+// Load input validation
+const validateRegisterInput = require('../validation/auth');
+const validateLoginInput = require('../validation/login');
+
 module.exports = {
   createUser: (req, res, next) => {
+
+	const { errors, isValid } = validateRegisterInput(req.body);
+
+	if (!isValid) {
+	  return res.status(422).json(errors);
+	};
+
     const { email, password, firstName, lastName, phone } = req.body;
 
     const createString = `
@@ -19,8 +30,9 @@ module.exports = {
       if (err) return next({ err });
       db.query(createString, [email, hash, firstName, lastName, phone])
         .then(data => {
-		  res.locals.email = email;
+		  res.locals.confirmation = 'Success';
           res.locals.firstName = firstName;
+		  res.locals.message = 'New user created';
           return next();
         })
         .catch(err => {
@@ -31,6 +43,12 @@ module.exports = {
   },
 
   loginUser: (req, res, next) => {
+
+	const { errors, isValid } = validateLoginInput(req.body);
+	if (!isValid) {
+	  return res.status(422).json(errors);
+	};
+
     const { email, password } = req.body;
 
     const queryString = `
