@@ -1,9 +1,11 @@
 import React, { useContext, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
 import setAuthToken from './utils/setAuthToken';
+import "animate.css/animate.min.css";
 
 // Components
 import Navbar from './components/containers/Navbar';
+import About from './components/presentation/About';
 import Landing from './components/presentation/Landing';
 import Register from './components/containers/Register';
 import Login from './components/containers/Login';
@@ -39,6 +41,7 @@ const Root = () => {
 		<Router>
 		  <Navbar />
 		  <Route exact path='/' component={Landing} />
+		  <Route exact path='/about' component={About} />
 		  <Route exact path='/register' component={Register} />	
 		  <Route exact path='/login' component={Login} />
 		  <Route exact path='/calendar' component={Calendar} />
